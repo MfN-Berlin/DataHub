@@ -1,0 +1,114 @@
+version: "3.9"
+
+services:
+  datahub:
+    image:
+      datahub:latest
+    hostname: datahub
+    build:
+      context: .
+      dockerfile: datahub.dockerfile
+    ports:
+      - "8060:8060"
+    # expose:
+    #   - 8060
+    volumes:
+      # - gdm:/gdm
+      - gdm_storage:/storage
+      - gdm_smb:/storage/media/smb:rw
+    command: >
+        sh -c  "python manage.py wait_for_db &&
+                python manage.py makemigrations &&
+                python manage.py migrate &&                 
+                # Creating the project for the first time (Uncomment to create the django code)
+                # django-admin.py startproject gdm . &&
+                # python manage.py startapp datahub &&
+                # python manage.py makemigrations datahub &&
+                # python manage.py migrate datahub &&                
+                # python manage.py test &&
+                # Creates a superuser with the given env. Use it when a new database is set.       
+                # python manage.py createsuperuser --noinput &&
+                python manage.py collectstatic --noinput  &&      
+                # python manage.py runserver 0.0.0.0:8060  
+                # uwsgi --ini uwsgi.ini
+                gunicorn gdm.wsgi -c /gdm/gunicornconf.py                
+                "
+    env_file: .env-dev
+    # depends_on:
+    #   - postgres
+    restart: "on-failure"
+  nginx:
+    # user: 1000:0
+    image:
+        datahub_nginx:latest
+    hostname: nginx
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - gdm_storage:/storage
+    depends_on:
+      - datahub
+    restart: "on-failure"
+  airflow:
+    env_file: ./files/airflow/.env-air
+    user: 50000:0
+    image:
+      airflow:latest
+    hostname: airflow
+    build:
+      context: .
+      dockerfile: airflow.dockerfile
+    ports:
+      - "8080:8080"
+    command: standalone
+    volumes:
+      - ./files/airflow/dags:/opt/airflow/dags:rw
+      # - logs-volume:/opt/airflow/logs
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5    
+    restart: always
+  postgres:
+    image:
+        postgres:latest
+    hostname: postgres
+    build:
+      context: .
+      dockerfile: postgres.dockerfile
+    ports:
+      - 5432:5432
+    volumes:
+      - /var/lib/postgresql/data
+      # - gdm_db:/var/lib/postgresql/data
+    env_file: .env-db
+    restart: "on-failure"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+volumes: # You should add this and the following line
+  # gdm: # you can define any name
+    # external: true
+  gdm_storage:
+  # gdm_db:
+  logs-volume:
+  gdm_smb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      # device: '/mnt/data'
+  gdm_backup:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      # device: '/mnt/data'
+networks:
+  default:
+    # external: true
+    name: datahub_network

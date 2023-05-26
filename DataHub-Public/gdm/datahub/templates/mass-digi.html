@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+<!-- {% load render_table from django_tables2 %} -->
+{% block content %}
+
+{% if obj %}
+<form action="{% url 'import_mass_digi' %}" method="post">
+    {% csrf_token %}
+    {% if total %}
+    <div style="width: 95%; padding-bottom: 5px; text-align: left; float: left; margin-right: 15px;">
+        <span>Datasets in Total: </span><span style="font-weight: bold;">{{ total }}</span>&nbsp;&nbsp;
+        <span>Validated: </span><span style="font-weight: bold;">{{ total_validated }}</span>&nbsp;&nbsp;
+        <span>Integrated: </span><span style="font-weight: bold;">{{ total_integrated }}</span>&nbsp;&nbsp;
+        <span>( Specimens: </span><span style="font-weight: bold;">{{ total_specimens }}</span>&nbsp;&nbsp;
+        <span>Images: </span><span style="font-weight: bold;">{{ total_images }}</span>&nbsp;)&nbsp;&nbsp;
+        <span>Batch Integration Actions:</span>
+        <button type="submit" class="btn btn-success btn-sm" id='import_all' name='import_all'
+            value="{{ obj }}"><b>&nbsp;&nbsp;Import and Validate (max 20 datasets)&nbsp;&nbsp; </b></button>
+        <button type="submit" class="btn btn-success btn-sm" id='integrate_all' name='integrate_all'
+            value="{{ obj }}"><b>&nbsp;&nbsp;Integrate (max 50 datasets)&nbsp;&nbsp; </b></button>
+        <button type="submit" class="btn btn-success btn-sm" id='update_all' name='update_all'
+            value="{{ obj }}"><b>&nbsp;&nbsp;Update (max 50 datasets)&nbsp;&nbsp; </b></button>    
+    </div>
+    {% endif %}
+    <table class="table table-dark table-striped">
+        <tr>
+            <th>Filename</th>
+            <th>Datetime</th>
+            <th>Status</th>
+            <th>Specimens</th>
+            <th>Images</th>
+            <th>Problems</th>
+            <th colspan="3">Actions</th>
+        </tr>
+        {% for i in obj %}
+        <tr>
+            <td>{{i.dataset}}</td>
+            <td>{{i.creation_date}}</td>
+            <td>
+                <input type="checkbox" id="status_imported" name="status_imported" disabled {{ i.status_imported }}> 
+                <label for="status_imported">Imported</label>&nbsp;&nbsp;&nbsp;
+                <input type="checkbox" id="status_integrated" name="status_integrated" disabled {{ i.status_integrated }}>
+                <label for="status_integrated">Integrated</label>
+                <input type="checkbox" class="form-check-input" id="status_validated" name="status_validated" disabled {{ i.status_validated }}>
+                <label for="status_validated">Validated</label><br>
+            </td>
+            <td>
+                <label for="dataste_stats">{{ i.dataset_stats.specimen_integrated_count|stringformat:"i" }} /
+                    {{ i.dataset_stats.specimen_count|stringformat:"i" }}</label><br>
+            </td>
+            <td>
+                <label for="dataste_stats">{{ i.dataset_stats.image_integrated_count|stringformat:"i" }} / 
+                    {{ i.dataset_stats.image_count|stringformat:"i" }}</label><br>
+            </td>
+            <td>
+                <label for="dataste_stats">{{ i.dataset_stats.specimnen_problem_count|stringformat:"i" }} / 
+                        {{ i.dataset_stats.image_problem_count|stringformat:"i" }}</label><br>
+            </td>
+            <td>
+                <button type="submit" class="btn btn-primary btn-sm" id='import_files' name='import_files'
+                    value="{{i}}"><b>Validate Dataset</b></button>
+            </td>
+            <td>
+                <button type="submit" class="btn btn-primary btn-sm" id='integrate_files' name='integrate_files'
+                    value="{{i}}"><b>Integrate Dataset</b></button>
+            </td>
+            <td>
+                <button type="submit" class="btn btn-primary btn-sm" id='sample_files' name='sample_files'
+                    value="{{i}}"><b>Sample Labels</b></button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</form>
+{% endif %}
+
+<div class="modal"><i class="bi bi-hourglass-split"></i></div>
+{% endblock %}

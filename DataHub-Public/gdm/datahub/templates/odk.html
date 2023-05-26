@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+
+{% if obj %}
+<form action="{% url 'import_odk' %}" method="post">
+    {% csrf_token %}
+    <div style="width: 50%; padding-bottom: 5px; text-align: right; float: right;">
+        <span>Auto-import all existing dataset in datahub:</span>
+        <button type="submit" class="btn btn-success btn-sm" id='auto_all' name='import_all'
+                    value="all"><b>Auto-import All</b></button>
+    </div>
+    <table class="table table-dark table-striped">
+        <tr>
+            <th>projectName</th>
+            <th>xmlFormId</th>
+            <th>formName</th>
+            <th>state</th>
+            <th>submissions</th>
+            <th>lastSubmission</th>
+            <th colspan="5">Operations</th>
+            
+        </tr>
+        {% for i in obj %}
+        <tr>
+            <td>{{i.projectName}}</td>
+            <td>{{i.xmlFormId}}</td>
+            <td>{{i.name}}</td>
+            <td>{{i.state}}</td>
+            <td>{{i.submissions}}</td>
+            <td>{{i.lastSubmission}}</td>
+            <td><button type="submit" class="btn btn-secondary btn-sm" id='import_csv_original' name='import_files'
+                    value="original//{{i.projectId}}//{{i.projectName}}//{{i.name}}//{{i.xmlFormId}}//{{i.state}}//{{i.lastSubmission}}"><b>Import
+                        Original
+                        CSV</b></button></td>
+            <td><button type="submit" class="btn btn-secondary btn-sm" id='import_csv_merged' name='import_files'
+                    value="merged//{{i.projectId}}//{{i.projectName}}//{{i.name}}//{{i.xmlFormId}}//{{i.state}}//{{i.lastSubmission}}"><b>Import
+                        Flat CSV</b></button>&nbsp;&nbsp;&nbsp;
+            </td>
+            <td><button type="submit" class="btn btn-secondary btn-sm" id='import_csv_attachment' name='import_files'
+                    value="attachment//{{i.projectId}}//{{i.projectName}}//{{i.name}}//{{i.xmlFormId}}//{{i.state}}//{{i.lastSubmission}}"><b>Import
+                        Attachments</b></button></td>
+            <td><button type="submit" class="btn btn-info btn-sm" id='auto_attachment' name='import_files'
+                    value="automated//{{i.projectId}}//{{i.projectName}}//{{i.name}}//{{i.xmlFormId}}//{{i.state}}//{{i.lastSubmission}}"><b>Auto-Import
+                        Attachments</b></button></td>
+            <td><button type="submit" class="btn btn-info btn-sm" id='auto_smb' name='import_files'
+                    value="merged//{{i.projectId}}//{{i.projectName}}//{{i.name}}//{{i.xmlFormId}}//{{i.state}}//{{i.lastSubmission}}"><b>Auto-Import
+                        Export</b></button></td>
+        </tr>
+        {% endfor %}
+    </table>
+</form>
+{% endif %}
+
+<div class="modal"><i class="bi bi-hourglass-split"></i></div>
+{% endblock %}

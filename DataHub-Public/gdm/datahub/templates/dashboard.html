@@ -1,0 +1,102 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+<!-- <form action="/your-name/" method="post">
+     <label for="your_name">Your name: </label>
+    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
+    <input type="submit" value="OK">
+</form> -->
+<!-- <div>
+    <h3>Available Integration Operations</h3>
+</div> -->
+<div class="card-group">
+    {% if perms.datahub.view_dataset %}
+    <div class="col-sm-3 d-flex">
+        <div class="card" style="width: 22rem; margin-bottom: 20px;">
+            <div class="card-body" style="padding-bottom: 5px;">
+                <div style="min-height: 180px;">
+                    <img src="{% static 'img/mfn-logo.jpg' %}" class="card-img-top" alt="ODK" width="250px">
+                </div>
+                <h4 class="card-title text-dark">Data Hub Admin Panel</h4>
+                <p class="card-text text-secondary">Explore Datahub admin page to perform advanced actions on the datasets</p>
+            </div>
+            <button type="button" class="btn btn-primary " style="margin: 10px; width: 90%;"
+                onclick="location.href = '/admin'">View Admin Panel</button>
+            <div class="card-footer">
+                <small class="text-muted" style="font-weight: bold;">
+                    <span>Status: </span>
+                    <span style="color: green;">Online</span>
+                    <a href="/media/temp/operation.log" title="Log" style="float: right;">Latest Log</a>
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% for origin in origins %}
+    <div class="col-sm-3 d-flex">
+        <div class="card" style="width: 22rem; margin-bottom: 20px;">
+            <div class="card-body">
+                <div style="min-height: 180px;">
+                    <img src={{origin.logo_path}} class="card-img-top" alt="General" width="200px" height="200px">
+                </div>
+                <h4 class="card-title text-dark">{{ origin.tagline }}</h4>
+                <p class="card-text text-secondary">{{ origin.description }}</p>
+            </div>
+            <button type="button" class="btn btn-primary" style="margin: 10px; width: 90%;"
+                onclick="location.href = '{{ origin.link }}'" {% if origin.origin_status.id != 1 or not perms.datahub.add_dataset or not origin.active %}disabled{% endif %}> Explore </button>
+            <div class="card-footer">
+                <small class="text-muted" style="font-weight: bold;">
+                    <span>Status: </span>
+                    <span style="color:{{origin.origin_status.flag}}">{{ origin.origin_status }}</span>
+                    <a href="/admin/datahub/report/?dataset__origin__id__exact={{ origin.id }}&report_type__title=Incoming" title="Log" style="float: right;">Log</a>
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}    
+    <div class="col-sm-3 d-flex">
+        <div class="card" style="width: 22rem; margin-bottom: 10px;">
+            <div class="card-body">
+                <div style="min-height: 180px;">
+                    <img src="{% static 'img/edb-logo.png' %}" class="card-img-top" alt="ODK">
+                </div>
+                <h4 class="card-title text-dark">Integrate to EasyDB</h4>
+                <p class="card-text text-secondary">Export datasets to the media repository (EasyDB)</p>
+            </div>
+            <button type="button" class="btn btn-primary" style="margin: 10px; width: 90%;"
+                onclick="location.href = '/admin/datahub/dataset'" {% if not perms.datahub.add_dataset %}disabled{% endif %}>View EasyDB Export Panel</button>
+            <div class="card-footer">
+                <small class="text-muted" style="font-weight: bold;">
+                    <span>Status: </span>
+                    <span style="color: green;">Online</span>
+                    <a href="/admin/datahub/report/" title="Log" style="float: right;">Log</a>
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 d-flex">
+        <div class="card" style="width: 22rem; margin-bottom: 10px;">
+            <div class="card-body">
+                <div style="min-height: 180px;">
+                    <img src="{% static 'img/picturae-logo.svg' %}" class="card-img-top" alt="Picturae" width="200"
+                        height="200">
+                </div>
+                <h4 class="card-title text-dark">Export Picturae Sample Dataset</h4>
+                <p class="card-text text-secondary">Export Picturae dataset to the media repository (EasyDB)</p>
+            </div>
+            <form action="{% url 'export_picturae' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="margin: 10px; width: 90%;" name="export_dataset"
+                    id="export_dataset" value="test" {% if not perms.datahub.add_dataset %}disabled{% endif %}>Integrate to EasyDB</button>
+            </form>
+            <div class="card-footer">
+                <small class="text-muted" style="font-weight: bold;">
+                    <span>Status: </span>
+                    <span style="color: grey;">Ready - Offline</span>
+                    <a href="" enable="False" title="Done" style="float: right;">Done</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
