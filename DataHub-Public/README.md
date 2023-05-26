@@ -1,6 +1,6 @@
 DataHub: A Comprehensive Data Integration System for the Collection Data and Digitization Projects in the Natural History Museum, Berlin.
 
-Majid Vafadar
+Author:  majid.vafadar@mfn.berlin 
 
 MfN DataHub (Museum fuer Naturkunde Berlin Data Hub) is a central integration system to automate digitization data pipelines from various digitization stations to their target systems. DataHub has been developed in the Museum of Natural History Berlin to support the integration of digitization and collection projects to the scientific data management systems. An open-source web service together with Apache Airflow as a workflow engine would handle the entire data pipelines automatically. 
 
